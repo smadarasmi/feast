@@ -14,35 +14,21 @@ services:
       DB_HOST: feast_postgres_1
       STORE_SERVING_TYPE: redis
       STORE_SERVING_OPTIONS: '{"host": "feast_redis_1", "port": "6379"}'
-    networks:
-      - feast_docker
   postgres:
     image: "postgres:alpine"
     ports:
       - "5432:5432"
-    networks:
-      - feast_docker
   redis:
     image: "redis:alpine"
     ports:
       - "6379:6379"
-    networks:
-      - feast_docker
   serving:
     image: gcr.io/kf-feast/feast-serving:0.1.2
     depends_on:
       - core
-      - postgres
-      - redis
     ports:
       - "6566:6566"
     environment:
       STORE_SERVING_TYPE: redis
       STORE_SERVING_OPTIONS: '{"host": "feast_redis_1", "port": "6379"}'
       FEAST_CORE_HOST: "coreservice"
-    networks:
-      - feast_docker
-  
-networks:
-  feast_docker:
-    driver: "bridge"
