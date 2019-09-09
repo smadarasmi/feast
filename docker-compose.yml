@@ -1,0 +1,35 @@
+version: '3'
+services:
+  core:
+    container_name: coreservice
+    image: gcr.io/kf-feast/feast-core:0.1.2
+    ports:
+      - "6565:6565"
+      - "80:80"
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      JOB_WORKSPACE: "/tmp"
+      JOB_RUNNER: DirectRunner
+      DB_HOST: feast_postgres_1
+      STORE_SERVING_TYPE: redis
+      STORE_SERVING_OPTIONS: '{"host": "feast_redis_1", "port": "6379"}'
+  postgres:
+    image: "postgres:alpine"
+    ports:
+      - "5432:5432"
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+  serving:
+    image: gcr.io/kf-feast/feast-serving:0.1.2
+    depends_on:
+      - core
+    ports:
+      - "6566:6566"
+    environment:
+      STORE_SERVING_TYPE: redis
+      STORE_SERVING_OPTIONS: '{"host": "feast_redis_1", "port": "6379"}'
+      FEAST_CORE_HOST: "coreservice"
